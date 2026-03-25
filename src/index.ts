@@ -10,43 +10,43 @@ app.use(express.json());
 
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+import slotsRouter from "./routes/slots";
 
 const options = {
-  swaggerDefinition: {
+  definition: {
     openapi: "3.0.0",
-    info: { title: "ChronoPay API", version: "1.0.0" },
+    info: {
+      title: "ChronoPay API",
+      version: "1.0.0",
+      description: "ChronoPay Backend API Documentation",
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT}`,
+        description: "Development server",
+      },
+    ],
   },
-  apis: ["./src/routes/*.ts"], // adjust if needed
+  apis: ["./src/routes/*.ts", "./src/index.ts"],
 };
 
 const specs = swaggerJsdoc(options);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
+/**
+ * @openapi
+ * /health:
+ *   get:
+ *     summary: Check service health
+ *     responses:
+ *       200:
+ *         description: Service is healthy
+ */
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "chronopay-backend" });
 });
 
-app.get("/api/v1/slots", (_req, res) => {
-  res.json({ slots: [] });
-});
-
-app.post(
-  "/api/v1/slots",
-  validateRequiredFields(["professional", "startTime", "endTime"]),
-  (req, res) => {
-    const { professional, startTime, endTime } = req.body;
-
-    res.status(201).json({
-      success: true,
-      slot: {
-        id: 1,
-        professional,
-        startTime,
-        endTime,
-      },
-    });
-  },
-);
+app.use("/api/v1/slots", slotsRouter);
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {

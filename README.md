@@ -36,6 +36,13 @@ npm run dev
 npm run start
 ```
 
+## API Documentation
+
+The API is documented using OpenAPI 3.0 and Swagger UI.
+
+- **Swagger UI**: [http://localhost:3001/api-docs/](http://localhost:3001/api-docs/)
+- **Endpoints Documentation**: Defined using JSDoc annotations in the [routes](file:///c:/Users/D%20INGREDEBLE%20JP/Desktop/chronopay2/src/routes) directory.
+
 ## Scripts
 
 | Script   | Description                    |
