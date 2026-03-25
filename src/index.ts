@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { validateRequiredFields } from "./middleware/validation";
+import { validateRequiredFields } from "./middleware/validation.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -49,7 +49,7 @@ app.post(
 );
 
 // SMS notification endpoint (implements BE-031 requirement)
-import { InMemorySmsProvider, SmsNotificationService } from "./services/smsNotification";
+import { InMemorySmsProvider, SmsNotificationService } from "./services/smsNotification.js";
 
 const smsService = new SmsNotificationService(new InMemorySmsProvider());
 
