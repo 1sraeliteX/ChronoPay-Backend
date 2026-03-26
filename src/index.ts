@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import { validateRequiredFields } from "./middleware/validation";
+import { validateRequiredFields } from "./middleware/validation.js";
+import { buyerProfileRoutes } from "./buyer-profile/index.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -42,11 +43,14 @@ app.post(
         id: 1,
         professional,
         startTime,
-        endTime,
+       endTime,
       },
     });
   },
 );
+
+// Buyer Profile routes
+app.use("/api/v1/buyer-profiles", buyerProfileRoutes);
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
