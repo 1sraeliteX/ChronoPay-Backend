@@ -1,10 +1,17 @@
 import express from "express";
 import cors from "cors";
-import { listSlots } from "./services/slotService.js";
-import { validateRequiredFields } from "./middleware/validation.js";
+import { logInfo } from "./utils/logger.js";
+import {
+  createRequestLogger,
+  errorLoggerMiddleware,
+} from "./middleware/requestLogger.js";
+import { validateRequiredFields } from "./middleware/validation";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
+
+// Request logging middleware (must be first)
+app.use(createRequestLogger());
 
 app.use(cors());
 app.use(express.json());
@@ -24,31 +31,18 @@ const specs = swaggerJsdoc(options);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", service: "chronopay-backend" });
+  const healthStatus = { status: "ok", service: "chronopay-backend" };
+  logInfo("Health check endpoint called", { endpoint: "/health" });
+  res.json(healthStatus);
 });
 
-app.get("/api/v1/slots", async (req, res) => {
-  try {
-    const pageRaw = req.query.page;
-    const limitRaw = req.query.limit;
-
-    const page = pageRaw === undefined ? undefined : Number(pageRaw);
-    const limit = limitRaw === undefined ? undefined : Number(limitRaw);
-
-    const pagination = await listSlots({ page, limit });
-
-    res.json(pagination);
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      if (err.message === "Invalid page" || err.message === "Invalid limit" || err.message === "Limit exceeds maximum allowed value") {
-        return res.status(400).json({ error: err.message });
-      }
-    }
-
-    res.status(500).json({ error: "Internal server error" });
-  }
+app.get("/api/v1/slots", (_req, res) => {
+  logInfo("Slots endpoint called", { endpoint: "/api/v1/slots" });
+  res.json({ slots: [] });
 });
 
+// Error handling middleware (must be last)
+app.use(errorLoggerMiddleware);
 app.post(
   "/api/v1/slots",
   validateRequiredFields(["professional", "startTime", "endTime"]),
@@ -69,7 +63,10 @@ app.post(
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
-    console.log(`ChronoPay API listening on http://localhost:${PORT}`);
+    logInfo(`ChronoPay API listening on http://localhost:${PORT}`, {
+      port: PORT,
+      environment: process.env.NODE_ENV || "development",
+    });
   });
 }
 
