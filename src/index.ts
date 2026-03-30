@@ -168,7 +168,7 @@ app.post(
   "/api/v1/slots",
   authenticateToken, // auth first: reject unauthenticated requests before validation
   validateRequiredFields(["professional", "startTime", "endTime"]),
-  (req, res) => {
+  async (req, res) => {
     const { professional, startTime, endTime } = req.body;
 
     const slot = {
