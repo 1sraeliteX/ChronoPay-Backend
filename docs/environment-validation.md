@@ -12,10 +12,11 @@ ChronoPay validates environment variables centrally in `src/config/env.ts` befor
 
 ## Variables covered
 
-Current `src` usage only requires these variables:
+Current `src` usage requires these variables:
 
 - `NODE_ENV`
 - `PORT`
+- `REDIS_URL`
 
 ## Defaults and constraints
 
@@ -27,6 +28,12 @@ Current `src` usage only requires these variables:
   - optional
   - defaults to `3001`
   - must be a whole number between `1` and `65535`
+- `REDIS_URL`
+  - required
+  - must be a valid URL
+  - allowed schemes: `redis`, `rediss`
+  - host is required
+  - whitespace-only values are rejected
 
 Whitespace-only values are rejected rather than treated as valid.
 
