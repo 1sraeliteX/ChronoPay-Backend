@@ -8,8 +8,8 @@ export interface VerifiedJwtPayload extends JwtPayload {
 }
 
 export function verifyJwt(token: string): VerifiedJwtPayload {
+  const config = getJwtConfig();
   try {
-    const config = getJwtConfig();
     const decoded = jwt.verify(token, config.secret, {
       issuer: config.issuer,
       audience: config.audience,
