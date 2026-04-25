@@ -76,6 +76,31 @@ const getUserAgent = (req: Request): string => {
   return req.get("user-agent") || "unknown";
 };
 
+const sanitizeRequestHeaders = (
+  headers: Record<string, unknown> | undefined,
+): Record<string, unknown> => {
+  if (!headers) {
+    return {};
+  }
+
+  const sanitized: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(headers)) {
+    const normalizedKey = key.toLowerCase();
+    if (
+      normalizedKey === "authorization" ||
+      normalizedKey === "cookie" ||
+      normalizedKey === "x-api-key"
+    ) {
+      continue;
+    }
+
+    sanitized[key] = value;
+  }
+
+  return sanitized;
+};
+
 /**
  * Creates the HTTP request logging middleware for Express
  * Logs all incoming requests with timing, status, and metadata
@@ -94,6 +119,7 @@ export const createRequestLogger = () => {
     return (req: Request, res: Response, next: NextFunction) => {
       // Minimal request processing for tests
       (req as any).startTime = Date.now();
+      (req as any).id = req.requestId;
       next();
     };
   }
@@ -152,6 +178,9 @@ export const createRequestLogger = () => {
      * Custom request ID generation for traceability
      */
     genReqId: (req: any) => {
+      if (typeof req.requestId === "string" && req.requestId.length > 0) {
+        return req.requestId;
+      }
       // Use existing request ID if present (from proxy/gateway)
       const existingId =
         req.headers["x-request-id"] || req.headers["x-correlation-id"];
@@ -169,11 +198,12 @@ export const createRequestLogger = () => {
     serializers: {
       req: (req: Request) => ({
         id: req.id,
+        apiKeyId: req.apiKeyId,
         method: req.method,
         url: req.originalUrl || req.url,
         query: req.query,
         params: req.params,
-        headers: req.headers,
+        headers: sanitizeRequestHeaders(req.headers as Record<string, unknown>),
         remoteAddress: req.ip,
         userAgent: req.get("user-agent"),
       }),
@@ -203,7 +233,7 @@ export const errorLoggerMiddleware = (
   res: Response,
   next: any
 ) => {
-  const requestId = req.id || "unknown";
+  const requestId = req.requestId || req.id || "unknown";
   const duration = calculateDuration(req.startTime);
 
   logger.error(
@@ -214,11 +244,12 @@ export const errorLoggerMiddleware = (
         stack: err.stack,
         code: err.code,
       },
+      apiKeyId: req.apiKeyId,
       request: {
         id: requestId,
         method: req.method,
         url: req.originalUrl || req.url,
-        headers: req.headers,
+        headers: sanitizeRequestHeaders(req.headers as Record<string, unknown>),
         body: req.body,
         query: req.query,
         params: req.params,
