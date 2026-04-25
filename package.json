@@ -27,6 +27,7 @@
     "@types/express-rate-limit": "^5.1.3",
     "@types/jest": "^29.5.14",
     "@types/json-schema": "^7.0.15",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.10.0",
     "@types/pg": "^8.20.0",
     "@types/supertest": "^6.0.2",
