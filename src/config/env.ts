@@ -1,5 +1,24 @@
 export type NodeEnv = "development" | "test" | "production";
 
+export interface EncryptionKey {
+  id: string;
+  value: Buffer;
+}
+
+export type IdempotencyRedisEncryptionConfig =
+  | {
+      enabled: false;
+      algorithm: "aes-256-gcm";
+      activeKey: null;
+      decryptionKeys: readonly EncryptionKey[];
+    }
+  | {
+      enabled: true;
+      algorithm: "aes-256-gcm";
+      activeKey: EncryptionKey;
+      decryptionKeys: readonly EncryptionKey[];
+    };
+
 export interface EnvConfig {
   nodeEnv: NodeEnv;
   port: number;
