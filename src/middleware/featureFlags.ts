@@ -11,7 +11,7 @@ export function featureFlagContextMiddleware(
   _res: Response,
   next: NextFunction,
 ): void {
-  req.flags = getFeatureFlagAccessor();
+  (req as any).flags = getFeatureFlagAccessor();
   next();
 }
 

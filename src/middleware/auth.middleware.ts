@@ -1,23 +1,17 @@
 /**
  * Authentication Middleware
- * 
+ *
  * Provides JWT-based authentication and authorization middleware.
  */
 
 import { Request, Response, NextFunction } from "express";
 import { verifyJwt, VerifiedJwtPayload } from "../utils/jwt.js";
 
-/**
- * User roles in the system
- */
 export enum UserRole {
   USER = "user",
   ADMIN = "admin",
 }
 
-/**
- * Authenticated user structure
- */
 export interface AuthenticatedUser {
   id: string;
   email: string;
@@ -25,9 +19,6 @@ export interface AuthenticatedUser {
   [key: string]: unknown;
 }
 
-/**
- * Extend Express Request to include authenticated user
- */
 declare global {
   namespace Express {
     interface Request {
@@ -80,15 +71,13 @@ export function authorize(...allowedRoles: string[]) {
       });
     }
 
-    next();
+    return next();
   };
 }
 
-/**
- * Check if user is accessing their own resource
- * Prevents horizontal privilege escalation
- */
-export function authorizeOwnerOrAdmin(getResourceUserId: (req: Request) => string | null) {
+export function authorizeOwnerOrAdmin(
+  getResourceUserId: (req: Request) => string | null,
+) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ success: false, error: "Unauthorized" });
@@ -109,6 +98,6 @@ export function authorizeOwnerOrAdmin(getResourceUserId: (req: Request) => strin
       return res.status(403).json({ success: false, error: "Access denied" });
     }
 
-    next();
+    return next();
   };
 }

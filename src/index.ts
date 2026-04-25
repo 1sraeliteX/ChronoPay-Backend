@@ -15,8 +15,12 @@ export function startServer(
 const config = loadEnvConfig();
 const app = createApp();
 
-if (config.nodeEnv !== "test") {
-  startServer(app, config);
+const PORT = process.env.PORT || 3000;
+
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    logInfo(`Server running on port ${PORT}`);
+  });
 }
 
 export default app;
